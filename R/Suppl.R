@@ -30,7 +30,7 @@ system.time(suppl_1 <- foreach(i = icount(100), .combine = rbind) %do% {
 suppl_1 |> write_csvr("output/suppl_1.csv")
 
 gp <- read_csvr("output/suppl_1.csv") |> mutate(diff = abs(total - tr) / total) |> ggplot(aes(x = z, y = diff)) + geom_point(shape = 16, size = 0.5, alpha = 0.25) +
-    geom_smooth(method = "glm", method.args = list(family = zeta), linewidth = 0.5, color = ggsci::pal_npg()(2)[1]) +
+    geom_smooth(method = "glm", method.args = list(family = Gamma), linewidth = 0.5, color = ggsci::pal_npg()(2)[1]) +
     xlab(expression(Delta*italic(z))) + ylab("Approximation error") + theme_st()
 gp |> ggsaver("figS1", width = 8.7, height = 6, ext = "pdf")
 
@@ -116,6 +116,7 @@ dist2 <- foreach(i = 1:100, .combine = bind_rows) %do% {
     eig <- eigen(solve(D) %*% E, only.values = TRUE)$values
     tibble(zeta = zeta, run = i, Re = Re(eig), Im = Im(eig), abs = abs(eig))
 }
+
 ## Make Figure S3A
 gp1 <- bind_rows(dist1, dist2) |> mutate(zeta = sprintf('zeta==%1d', zeta)) |>
     ggplot(aes(x = abs)) + facet_wrap(. ~ zeta, nrow = 2, scales = "free_y", labeller = label_parsed) +
@@ -155,7 +156,7 @@ system.time(suppl_3 <- foreach(zeta = c(rep(1, 500), rep(2, 500)), .combine = bi
 suppl_3 |> write_csvr("output/suppl_3.csv")
 gp2 <- read_csvr("output/suppl_3.csv") |> ggplot(aes(x = Robs, y = abs(Rho), color = factor(zeta))) +
     geom_point(shape = 16, size = 0.5, alpha = 0.5) + geom_vline(xintercept = 1, linewidth = 0.25, color = ggsci::pal_npg()(4)[1]) +
-    scale_color_brewer(palette = "Dark2") + scale_y_continuous(breaks = seq(0, 1, 0.5), limits = c(0, 1)) + xlab(expression(max((lambda(Phi[B]))))) +
+    scale_color_brewer(palette = "Dark2") + scale_y_continuous(breaks = seq(0, 1, 0.5), limits = c(0, 1)) + xlab(expression(max((group("|", lambda(Phi[B]), "|"))))) +
     ylab(expression(paste("Prediction skill ", rho[italic(k)]))) + labs(tag = "B", color = expression(zeta)) + theme_st()
 
 ## The relationship between interaction mean/interaction correlation (mu & rho) and the largest eigenvalue in finite size networks with functional responses (s = 250)
@@ -193,9 +194,9 @@ gp3 <- read_csvr("output/suppl_4.csv") |> group_by(zeta, size, connectance, sigm
     geom_raster(interpolate = TRUE) + geom_contour(color = "grey40", linewidth = 0.25, breaks = log(1)) +
     scico::scale_fill_scico(palette = "vik", midpoint = 0) + scale_x_continuous(expand = rep(1e-3, 2)) + scale_y_continuous(expand = rep(1e-3, 2)) +
     xlab(expression(paste("Mean interaction strength ", mu))) + ylab(expression(paste("Interaction correlation ", rho))) +
-    labs(fill = expression(paste(log, group("|", lambda[1], "|")))) + theme_st(lunit = 2) + theme(legend.margin = margin(0, 0, 0, 0), legend.text = element_text(hjust = 1), panel.border = element_rect(color = "black", linewidth = 0.25), panel.spacing = unit(5, "mm"))
+    labs(tag = "C", fill = expression(paste(log, group("|", lambda[1], "|")))) + theme_st(lunit = 2) + theme(legend.margin = margin(0, 0, 0, 0), legend.text = element_text(hjust = 1), panel.border = element_rect(color = "black", linewidth = 0.25), panel.spacing = unit(5, "mm"))
 
-(((gp1 + gp2) / gp3) + plot_layout(height = c(1, 2))) |> ggsaver(name = "figS3", width = 8.7, height = 12, ext = "pdf")
+(((gp1 / gp2 + plot_layout(height = c(2, 1))) | gp3) + plot_layout(width = c(2, 3))) |> ggsaver(name = "figS3", width = 17.8, height = 9, ext = "pdf")
 
 ## Figure S4: Simulation analysis investigating ecological indeterminacy of food webs
 ## A function to make a food web matrix
@@ -335,8 +336,8 @@ gp3 <- read_csvr("output/suppl_6.csv") |> group_by(size, connectance, sigma, mu_
     ggplot(aes(x = mu_u, y = mu_l, fill = log(Robs), z = log(Robs))) + geom_raster(interpolate = TRUE) + geom_contour(color = "grey40", linewidth = 0.25, breaks = log(1)) +
     geom_abline(slope = -1, intercept = 0, linetype = 2, linewidth = 0.25) +
     scico::scale_fill_scico(palette = "vik", midpoint = 0) + scale_x_continuous(expand = rep(1e-3, 2)) + scale_y_continuous(expand = rep(1e-3, 2)) +
-    xlab(expression(mu[U])) + ylab(expression(mu[L])) + labs(fill = expression(paste(log, group("|", lambda[1], "|")))) + theme_st(lunit = 2) +
+    xlab(expression(mu[U])) + ylab(expression(mu[L])) + labs(tag = "C", fill = expression(paste(log, group("|", lambda[1], "|")))) + theme_st(lunit = 2) +
     theme(legend.margin = margin(0, 0, 0, 0), legend.text = element_text(hjust = 1), panel.border = element_rect(color = "black", linewidth = 0.25), panel.spacing = unit(5, "mm"))
 
-(gp1 / (gp2 + gp3)) |> ggsaver(name = "figS4", width = 8.7, height = 8.5, ext = "pdf")
+(gp1 / (gp2 + gp3 + plot_layout(width = c(6, 7)))) |> ggsaver(name = "figS4", width = 8.7, height = 8.5, ext = "pdf")
 
