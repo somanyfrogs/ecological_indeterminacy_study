@@ -1,5 +1,5 @@
 #' @title Figure_1.R
-# @description Making figure 1 for the Paper entitled:
+#' @description Making figure 1 for the Paper entitled:
 #'      "Unraveling emergent network indeterminacy in complex ecosystems: a random matrix approach"
 #'      Initially written on 20230104 by K.Kawatsu.
 #'      Last update: 20240325.

@@ -18,15 +18,15 @@ matPow <- function(M, n, method = "direct") {
         eig <- eigen(M)
         P <- eig$vectors
         tmp <- P %*% diag(eig$values^n) %*% solve(P)
-        if(!is.complex(M)) tmp <- Re(tmp)
     } else {
         tmp <- NA
     }
 
+    if(!is.complex(M)) tmp <- Re(tmp)
     return(tmp)
 }
 
-#' Calculate k-th order approximation of Neumann series
+#' Calculate k-th order approximation of Neumann series.
 #'
 #' @param M A real or complex matrix.
 #' @param k An integer number specifying the approximation order.
