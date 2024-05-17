@@ -67,7 +67,7 @@ theme_st <- function(just = NULL, pos = NULL, lunit = 5.5) {
               legend.text = element_text(size = 6),
               legend.title = element_text(size = 6, face = "bold"),
               panel.grid.minor = element_blank(),
-              plot.tag = element_text(size = 8, face = "bold"),
+              plot.tag = element_text(size = 10),
               plot.title = element_text(size = 7, face = "bold"),
               strip.text = element_text(size = 6, color = "black", margin = mgn))
 

@@ -13,7 +13,7 @@ library(tidygraph)
 library(tidyverse)
 library(viridis)
 
-setwd("set the path of working directory")
+getwd() |> setwd() #setwd("set the path of working directory")
 source("R/func_matrix.R")
 source("R/func_manage.R")
 
