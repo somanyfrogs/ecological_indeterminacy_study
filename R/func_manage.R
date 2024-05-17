@@ -6,7 +6,7 @@
 
 #' Modified version of as_tibble
 #'
-#' @inheritParams tibble::As_tibble
+#' @inheritParams tibble::as_tibble
 #' @param coln A string vector setting column names.
 as_tibbler <- function(x, coln = NULL) {
     suppressMessages(tbl <- as_tibble(x, .name_repair = "unique"))
