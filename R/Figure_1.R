@@ -66,4 +66,4 @@ gp4 <- tibble(true = offdiag(St), appr = offdiag(Sa), text = sprintf('italic(k)=
     xlab(expression(paste("True ", bold(A[italic(ij)]^-1)))) + ylab(expression(paste("Approximated ", bold(A[italic(ij)]^-1)))) +
     theme_st() + theme(axis.text = element_blank(), axis.ticks = element_blank(), strip.background = element_blank())
 
-(gp1 / (gp2 + gp3 + gp4)) |> ggsaver("fig01a", width = 11.4, height = 9.2, ext = "pdf")
+(gp1 / (gp2 + gp3 + gp4)) |> ggsaver("fig01", width = 11.4, height = 9.2, ext = "pdf")
