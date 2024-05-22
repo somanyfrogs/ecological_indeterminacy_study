@@ -2,7 +2,7 @@
 #' @description Making figure 4 for the Paper entitled:
 #'      "Unraveling emergent network indeterminacy in complex ecosystems: a random matrix approach"
 #'      Initially written on 20221223 by K.Kawatsu.
-#'      Last update: 20240408.
+#'      Last update: 20240522.
 
 ## Load R functions
 source("R/functions.R")
@@ -21,14 +21,14 @@ system.time(sim_4 <- foreach(tbl = iter(params, by = "row"), .combine = bind_row
 
 sim_4 |> write_csvr("output/sim_4.csv")
 
-## ## Make figure
-tbl <- read_csvr("output/sim_4.csv") |> mutate(Rmax = case_when(log(Rmax) >= 2 ~ exp(2), lag(Rmax) <= -2 ~ exp(-2), TRUE ~ Rmax))
+## Make figure
+tbl <- read_csvr("output/sim_4.csv") |> mutate(ex = if_else(Rmax > 1, "y", "n"))
 
 gp <- tbl |> mutate(connectance = sprintf('italic(C)==%.2f', connectance) |> (\(.x) factor(.x, levels = rev(unique(.x))))()) |>
-    ggplot(aes(x = mu, y = rho, fill = log(Rmax), z = log(Rmax))) + facet_wrap(. ~ connectance, labeller = label_parsed) +
-    geom_raster(interpolate = TRUE) + geom_contour(color = "grey60", linewidth = 0.1) + geom_contour(color = "grey40", linewidth = 0.25, breaks = log(1 + 1e-5)) +
-    scico::scale_fill_scico(palette = "vik", midpoint = 0, breaks = c(-2, 0, 2)) + scale_x_continuous(expand = rep(1e-3, 2)) + scale_y_continuous(expand = rep(1e-3, 2)) +
-    xlab(expression(paste("Mean interaction strength ", mu))) + ylab(expression(paste("Interaction correlation ", rho))) + labs(fill = expression(log(gamma[max]))) +
-    theme_st() + theme(legend.margin = margin(0, 0, 0, 0), legend.text = element_text(hjust = 1), panel.border = element_rect(color = "black", linewidth = 0.25), panel.spacing = unit(5, "mm"), strip.background = element_blank())
+    ggplot(aes(x = mu, y = rho, fill = ex)) + facet_wrap(. ~ connectance, labeller = label_parsed) + geom_raster(interpolate = TRUE) +
+    geom_vline(xintercept = 0, linetype = 2) + geom_hline(yintercept = 0, linetype = 2) + scale_x_continuous(expand = rep(1e-3, 2)) +
+    scale_y_continuous(expand = rep(1e-3, 2)) + scale_fill_manual(values = c("grey90", "#c11000"), guide = "none") +
+    xlab(expression(paste("Mean interaction strength ", mu))) + ylab(expression(paste("Interaction correlation ", rho))) +
+    theme_st() + theme(panel.border = element_rect(color = "black", linewidth = 0.25), panel.spacing = unit(5, "mm"), strip.background = element_blank())
 
-gp |> ggsaver("fig04", width = 8.7, height = 8.3, ext = "pdf")
+gp |> ggsaver("fig04", width = 8.7, height = 9.4, ext = "pdf")
