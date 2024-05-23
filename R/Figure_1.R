@@ -24,7 +24,7 @@ A <- get_int_mat(s, sigma, mu, rho, d) * get_adj_mat(s, c)
 D <- (d - mu * c) * diag(s) + mu * c
 E <- A - D
 
-label <- c("'Interaction matrix'~bold(A)", "'Deterministic'~bold(D)", "'Random'~bold(E)")
+label <- c("'Interaction matrix'~bold(A)", "'Deterministic part'~bold(D)", "'Random part'~bold(E)")
 tbl_A <- A |> as_tibbler(1:s) |> mutate(row = 1:s) |> pivot_longer(!row, names_to = "col", values_to = "coeff") |> mutate(col = as.integer(col), type = "A")
 tbl_D <- D |> as_tibbler(1:s) |> mutate(row = 1:s) |> pivot_longer(!row, names_to = "col", values_to = "coeff") |> mutate(col = as.integer(col), type = "D")
 tbl_E <- E |> as_tibbler(1:s) |> mutate(row = 1:s) |> pivot_longer(!row, names_to = "col", values_to = "coeff") |> mutate(col = as.integer(col), type = "E")
