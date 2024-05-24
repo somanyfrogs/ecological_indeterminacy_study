@@ -7,6 +7,7 @@
 ## Load R functions
 source("R/functions.R")
 
+## Figure S1: Simulation analysis investigating the approximation accuracy of Stieltjes transformation
 rslv <- function(E, z) solve(z * diag(ncol(E)) - E)
 
 set.seed(123)
@@ -33,6 +34,83 @@ gp <- read_csvr("output/suppl_1.csv") |> mutate(diff = abs(total - tr) / total) 
     geom_smooth(method = "glm", method.args = list(family = Gamma), linewidth = 0.5, color = ggsci::pal_npg()(2)[1]) +
     xlab(expression(Delta*italic(z))) + ylab("Approximation error") + theme_st()
 gp |> ggsaver("figS1", width = 8.7, height = 6, ext = "pdf")
+
+## Figure S2: Demonstration of eigenvalu distributions of sensitivity essence Phi.
+## Set the common parameters
+s <- 250
+c <- 1.0
+sigma <- 0.1
+seed <- 123
+
+## Case 1: mu = -0.1, rho = 0.5
+mu <- -0.1
+rho <- 0.5
+
+tbl_eig1 <- func_eig(s = s, c = c, sigma = sigma, mu = mu, rho = rho, replicate = 1, seed = seed) |> mutate(eig_type = "ellipse")
+tbl_law1 <- func_law(s = s, c = c, sigma = sigma, mu = mu, rho = rho)
+
+## Case 1: mu = -0.1, rho = 0.0
+mu <- -0.1
+rho <- 0.0
+
+tbl_eig2 <- func_eig(s = s, c = c, sigma = sigma, mu = mu, rho = rho, replicate = 1, seed = seed) |> mutate(eig_type = "ellipse")
+tbl_law2 <- func_law(s = s, c = c, sigma = sigma, mu = mu, rho = rho)
+
+## Case 3: mu = -0.1, rho = -0.5
+mu <- -0.1
+rho <- -0.5
+
+tbl_eig3 <- func_eig(s = s, c = c, sigma = sigma, mu = mu, rho = rho, replicate = 1, seed = seed) |> mutate(eig_type = "ellipse")
+tbl_law3 <- func_law(s = s, c = c, sigma = sigma, mu = mu, rho = rho)
+
+## Case 4: mu = 0.1, rho = 0.5
+mu <- 0.1
+rho <- 0.5
+lout <- Re(func_out(s, c, sigma, mu, rho))
+
+tbl_eig4 <- func_eig(s = s, c = c, sigma = sigma, mu = mu, rho = rho, replicate = 1, seed = seed) |> mutate(eig_type = c(rep("outlier", 2), rep("ellipse", s - 2)))
+tbl_law4 <- func_law(s = s, c = c, sigma = sigma, mu = mu, rho = rho)
+tbl_out4 <- tbl_eig4 |> reframe(across(1:7, mean), real = sum(real) / 2 + c(-lout, lout), imag = rep(0, 2))
+
+## Case 5: mu = 0.1, rho = 0.0
+mu <- 0.1
+rho <- 0.0
+lout <- 0
+
+tbl_eig5 <- func_eig(s = s, c = c, sigma = sigma, mu = mu, rho = rho, replicate = 1, seed = 5) |> mutate(eig_type = c(rep("outlier", 1), rep("ellipse", s - 1)))
+tbl_law5 <- func_law(s = s, c = c, sigma = sigma, mu = mu, rho = rho)
+tbl_out5 <- tbl_eig5 |> reframe(across(1:7, mean), real = sum(real) + lout, imag = 0)
+
+## Case 6: mu = 0.1, rho = -0.5
+mu <- 0.1
+rho <- -0.5
+lout <- Im(func_out(s, c, sigma, mu, rho))
+
+tbl_eig6 <- func_eig(s = s, c = c, sigma = sigma, mu = mu, rho = rho, replicate = 1, seed = seed) |> mutate(eig_type = c(rep("outlier", 2), rep("ellipse", s - 2)))
+tbl_law6 <- func_law(s = s, c = c, sigma = sigma, mu = mu, rho = rho)
+tbl_out6 <- tbl_eig6 |> reframe(across(1:7, mean), real = sum(real) / 2, imag = c(-lout, lout))
+
+tbl_eig_a <- bind_rows(tbl_eig1, tbl_eig2, tbl_eig3) |> mutate(type = sprintf('(list(mu, rho))==(list(%.1f, %.1f))', sign(mu) * abs(mu), sign(rho) * abs(rho))) |> mutate(type = factor(type, levels = unique(type)))
+tbl_eig_b <- bind_rows(tbl_eig4, tbl_eig5, tbl_eig6) |> mutate(type = sprintf('(list(mu, rho))==(list(%.1f, %.1f))', sign(mu) * abs(mu), sign(rho) * abs(rho))) |> mutate(type = factor(type, levels = unique(type)))
+
+tbl_law_a <- bind_rows(tbl_law1, tbl_law2, tbl_law3) |> mutate(type = sprintf('(list(mu, rho))==(list(%.1f, %.1f))', sign(mu) * abs(mu), sign(rho) * abs(rho))) |> mutate(type = factor(type, levels = unique(type)))
+tbl_law_b <- bind_rows(tbl_law4, tbl_law5, tbl_law6) |> mutate(type = sprintf('(list(mu, rho))==(list(%.1f, %.1f))', sign(mu) * abs(mu), sign(rho) * abs(rho))) |> mutate(type = factor(type, levels = unique(type)))
+
+tbl_out_b <- bind_rows(tbl_out4, tbl_out5, tbl_out6) |> mutate(type = sprintf('(list(mu, rho))==(list(%.1f, %.1f))', sign(mu) * abs(mu), sign(rho) * abs(rho))) |> mutate(type = factor(type, levels = unique(type)))
+
+gp1 <- tbl_eig_a |> ggplot(aes(x = real, y = imag)) + facet_wrap(. ~ type, nrow = 1, labeller = label_parsed) +
+    geom_point(shape = 16, size = 0.25) +
+    geom_path(data = tbl_law_a, linewidth = 0.25, color = ggsci::pal_npg()(3)[1]) +
+    xlab(expression(paste("Real of ", lambda(Phi)))) + ylab(expression(paste("Imaginary of ", lambda(Phi)))) + theme_st(lunit = 2) 
+
+gp2 <- tbl_eig_b |> ggplot(aes(x = real, y = imag)) + facet_wrap(. ~ type, nrow = 1, labeller = label_parsed) +
+    geom_point(aes(size = eig_type), shape = 16) +
+    geom_point(data = tbl_out_b, shape = 4, color = ggsci::pal_npg()(3)[3]) +
+    geom_path(data = tbl_law_b, linewidth = 0.25, color = ggsci::pal_npg()(3)[1]) +
+    scale_size_discrete(range = c(0.25, 1.5), guide = "none") +
+    xlab(expression(paste("Real of ", lambda(Phi)))) + ylab(expression(paste("Imaginary of ", lambda(Phi)))) + theme_st(lunit = 2)
+
+(gp1 / gp2 + plot_layout(axis_title = "collect")) |> ggsaver("figS2", width = 17.8, height = 10, ext = "pdf")
 
 ## Figure S3: Simulation analysis investigating the relationship between interaction mean and interaction correlation (mu & rho)
 ##      and the maximum absolute eigenvalue Rmax in finite-size networks (s = 250)
