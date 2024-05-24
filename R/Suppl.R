@@ -34,7 +34,7 @@ gp <- read_csvr("output/suppl_1.csv") |> mutate(diff = abs(total - tr) / total) 
     xlab(expression(Delta*italic(z))) + ylab("Approximation error") + theme_st()
 gp |> ggsaver("figS1", width = 8.7, height = 6, ext = "pdf")
 
-## Figure S2: Simulation analysis investigating the relationship between interaction mean and interaction correlation (mu & rho)
+## Figure S3: Simulation analysis investigating the relationship between interaction mean and interaction correlation (mu & rho)
 ##      and the maximum absolute eigenvalue Rmax in finite-size networks (s = 250)
 s <- 250
 sigma <- 0.5
@@ -69,9 +69,9 @@ gp <- read_csvr("output/suppl_2.csv") |> group_by(size, connectance, sigma, mu, 
     xlab(expression(paste("Mean interaction strength ", mu))) + ylab(expression(paste("Interaction correlation ", rho))) + labs(fill = expression(paste(log, group("|", lambda[1], "|")))) +
     theme_st() + theme(legend.margin = margin(0, 0, 0, 0), legend.text = element_text(hjust = 1), panel.border = element_rect(color = "black", linewidth = 0.25), panel.spacing = unit(5, "mm"), strip.background = element_blank())
 
-gp |> ggsaver("figS2", width = 8.7, height = 8.3, ext = "pdf")
+gp |> ggsaver("figS3", width = 8.7, height = 8.3, ext = "pdf")
 
-## Figure S3: Simulation analysis investigating ecological indeterminacy of FR interaction systems
+## Figure S4: Simulation analysis investigating ecological indeterminacy of FR interaction systems
 ## Set the parameters
 s <- 250
 c <- 0.5
@@ -196,9 +196,9 @@ gp3 <- read_csvr("output/suppl_4.csv") |> group_by(zeta, size, connectance, sigm
     xlab(expression(paste("Mean interaction strength ", mu))) + ylab(expression(paste("Interaction correlation ", rho))) +
     labs(tag = "C", fill = expression(paste(log, group("|", lambda[1], "|")))) + theme_st(lunit = 2) + theme(legend.margin = margin(0, 0, 0, 0), legend.text = element_text(hjust = 1), panel.border = element_rect(color = "black", linewidth = 0.25), panel.spacing = unit(5, "mm"))
 
-(((gp1 / gp2 + plot_layout(height = c(2, 1))) | gp3) + plot_layout(width = c(2, 3))) |> ggsaver(name = "figS3", width = 17.8, height = 9, ext = "pdf")
+(((gp1 / gp2 + plot_layout(height = c(2, 1))) | gp3) + plot_layout(width = c(2, 3))) |> ggsaver(name = "figS4", width = 17.8, height = 9, ext = "pdf")
 
-## Figure S4: Simulation analysis investigating ecological indeterminacy of food webs
+## Figure S5: Simulation analysis investigating ecological indeterminacy of food webs
 ## A function to make a food web matrix
 get_fwd_mat <- function(s, sigma, mu_u, mu_l, rho, d) {
     A <- matrix(0, s, s) + d * diag(s)
@@ -339,5 +339,5 @@ gp3 <- read_csvr("output/suppl_6.csv") |> group_by(size, connectance, sigma, mu_
     xlab(expression(mu[U])) + ylab(expression(mu[L])) + labs(tag = "C", fill = expression(paste(log, group("|", lambda[1], "|")))) + theme_st(lunit = 2) +
     theme(legend.margin = margin(0, 0, 0, 0), legend.text = element_text(hjust = 1), panel.border = element_rect(color = "black", linewidth = 0.25), panel.spacing = unit(5, "mm"))
 
-(gp1 / (gp2 + gp3 + plot_layout(width = c(6, 7)))) |> ggsaver(name = "figS4", width = 8.7, height = 8.5, ext = "pdf")
+(gp1 / (gp2 + gp3 + plot_layout(width = c(6, 7)))) |> ggsaver(name = "figS5", width = 8.7, height = 8.5, ext = "pdf")
 

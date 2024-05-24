@@ -2,7 +2,7 @@
 #' @description Makfing figure 2 for the Paper entitled:
 #'      "Unraveling emergent network indeterminacy in complex ecosystems: a random matrix approach"
 #'      Initially written on 20221223 by K.Kawatsu.
-#'      Last update: 20240408.
+#'      Last update: 20240524.
 
 ## Load R functions
 source("R/functions.R")
@@ -80,96 +80,26 @@ system.time(sim_2 <- foreach(Rmax = c(0.74, 0.99, 1.24), .combine = bind_rows) %
 
 sim_2 |> write_csvr("output/sim_2.csv")
 
-## Figure 1A: Demonstration of eigenvalue distributions of sensitivity essence Phi.
-## Set the common parameters
-s <- 250
-c <- 1.0
-sigma <- 0.1
-seed <- 123
-
-## Case 1: mu = -0.1, rho = 0.5
-mu <- -0.1
-rho <- 0.5
-
-tbl_eig1 <- func_eig(s = s, c = c, sigma = sigma, mu = mu, rho = rho, replicate = 1, seed = seed) |> mutate(eig_type = "ellipse")
-tbl_law1 <- func_law(s = s, c = c, sigma = sigma, mu = mu, rho = rho)
-
-## Case 1: mu = -0.1, rho = 0.0
-mu <- -0.1
-rho <- 0.0
-
-tbl_eig2 <- func_eig(s = s, c = c, sigma = sigma, mu = mu, rho = rho, replicate = 1, seed = seed) |> mutate(eig_type = "ellipse")
-tbl_law2 <- func_law(s = s, c = c, sigma = sigma, mu = mu, rho = rho)
-
-## Case 3: mu = -0.1, rho = -0.5
-mu <- -0.1
-rho <- -0.5
-
-tbl_eig3 <- func_eig(s = s, c = c, sigma = sigma, mu = mu, rho = rho, replicate = 1, seed = seed) |> mutate(eig_type = "ellipse")
-tbl_law3 <- func_law(s = s, c = c, sigma = sigma, mu = mu, rho = rho)
-
-## Case 4: mu = 0.1, rho = 0.5
-mu <- 0.1
-rho <- 0.5
-lout <- Re(func_out(s, c, sigma, mu, rho))
-
-tbl_eig4 <- func_eig(s = s, c = c, sigma = sigma, mu = mu, rho = rho, replicate = 1, seed = seed) |> mutate(eig_type = c(rep("outlier", 2), rep("ellipse", s - 2)))
-tbl_law4 <- func_law(s = s, c = c, sigma = sigma, mu = mu, rho = rho)
-tbl_out4 <- tbl_eig4 |> reframe(across(1:7, mean), real = sum(real) / 2 + c(-lout, lout), imag = rep(0, 2))
-
-## Case 5: mu = 0.1, rho = 0.0
-mu <- 0.1
-rho <- 0.0
-lout <- 0
-
-tbl_eig5 <- func_eig(s = s, c = c, sigma = sigma, mu = mu, rho = rho, replicate = 1, seed = 5) |> mutate(eig_type = c(rep("outlier", 1), rep("ellipse", s - 1)))
-tbl_law5 <- func_law(s = s, c = c, sigma = sigma, mu = mu, rho = rho)
-tbl_out5 <- tbl_eig5 |> reframe(across(1:7, mean), real = sum(real) + lout, imag = 0)
-
-## Case 6: mu = 0.1, rho = -0.5
-mu <- 0.1
-rho <- -0.5
-lout <- Im(func_out(s, c, sigma, mu, rho))
-
-tbl_eig6 <- func_eig(s = s, c = c, sigma = sigma, mu = mu, rho = rho, replicate = 1, seed = seed) |> mutate(eig_type = c(rep("outlier", 2), rep("ellipse", s - 2)))
-tbl_law6 <- func_law(s = s, c = c, sigma = sigma, mu = mu, rho = rho)
-tbl_out6 <- tbl_eig6 |> reframe(across(1:7, mean), real = sum(real) / 2, imag = c(-lout, lout))
-
-tbl_eig <- bind_rows(tbl_eig1, tbl_eig2, tbl_eig3, tbl_eig4, tbl_eig5, tbl_eig6) |> mutate(type = sprintf('mu==%.2f', sign(mu) * abs(mu))) |> mutate(type = factor(type, levels = unique(type)))
-tbl_law <- bind_rows(tbl_law1, tbl_law2, tbl_law3, tbl_law4, tbl_law5, tbl_law6) |> mutate(type = sprintf('mu==%.2f', sign(mu) * abs(mu))) |> mutate(type = factor(type, levels = unique(type)))
-tbl_out <- bind_rows(tbl_out4, tbl_out5, tbl_out6) |> mutate(type = sprintf('mu==%.2f', sign(mu) * abs(mu))) |> mutate(type = factor(type, levels = unique(type)))
-
-gp1 <- tbl_eig |> mutate(rho = factor(rho, levels = c("0.5", "0", "-0.5"))) |>
-    ggplot(aes(x = real, y = imag, color = rho)) + facet_wrap(. ~ type, labeller = label_parsed, scales = "free") +
-    geom_point(pch = 21, aes(size = eig_type, fill = rho), alpha = 0.5) +
-    geom_point(data = mutate(tbl_out, rho = factor(rho, levels = c("0.5", "0", "-0.5"))), pch = 4) +
-    geom_path(data = mutate(tbl_law, rho = factor(rho, levels = c("0.5", "0", "-0.5"))), linewidth = 0.25) +
-    ggsci::scale_color_npg(guide = "none") + ggsci::scale_fill_npg(label = c("0.5", "0.0", "-0.5")) +
-    scale_size_discrete(range = c(0.1, 1.0), guide = "none") + labs(tag = "A", fill = expression(rho)) +
-    xlab(expression(paste("Real of ", lambda(Phi)))) + ylab(expression(paste("Imaginary of ", lambda(Phi)))) +
-    theme_st(lunit = 2, just = c(1, 0.01), pos = c(1, 0.01)) + 
-    theme(legend.margin = margin(0, 0, 0, 0), legend.text = element_text(hjust = 1, margin = margin(1, 1, 1, 1)), legend.title = element_text(margin = margin(1, 1, 1, 1)), legend.title.position = "left")
-
-## Make figure 2B-D
+## Make figure 2A-C
 tbl1 <- read_csvr("output/sim_1.csv")
 tbl2 <- read_csvr("output/sim_2.csv")
 pal <- ggsci::pal_npg()(2)
 
-gp2 <- tbl1 |> mutate(Rho = abs(Rho)) |> ggplot(aes(x = Rmax, y = Robs)) +
+gp1 <- tbl1 |> mutate(Rho = abs(Rho)) |> ggplot(aes(x = Rmax, y = Robs)) +
     geom_point(shape = 16, alpha = 0.25) + geom_abline(intercept = 0, slope = 1, color = pal[1], linewidth = 0.25) +
     xlab(expression(paste("Theoretical ", gamma[max]))) +
-    ylab(expression(paste("Sampled ", max((group("|", lambda(Phi), "|")))))) + labs(tag = "B") + theme_st()
+    ylab(expression(paste("Sampled ", max((group("|", lambda(Phi), "|")))))) + labs(tag = "A") + theme_st()
 
-gp3 <- tbl1 |> mutate(Rho = abs(Rho)) |> ggplot(aes(x = Rmax, y = Rho)) +
+gp2 <- tbl1 |> mutate(Rho = abs(Rho)) |> ggplot(aes(x = Rmax, y = Rho)) +
     geom_point(shape = 16, alpha = 0.25) + geom_vline(xintercept = 1, color = pal[1], linewidth = 0.25) +
     xlab(expression(paste("Theoretical ", gamma[max]))) +
-    ylab(expression(paste("Prediction skill ", italic(rho[k])))) + labs(tag = "C") + theme_st()
+    ylab(expression(paste("Prediction skill ", italic(rho[k])))) + labs(tag = "B") + theme_st()
 
-gp4 <- tbl2 |> mutate(Rho = abs(Rho), name = sprintf('gamma[max]==%.2f', Rmax)) |>
+gp3 <- tbl2 |> mutate(Rho = abs(Rho), name = sprintf('gamma[max]==%.2f', Rmax)) |>
     ggplot(aes(x = factor(order), y = Rho)) + facet_wrap(. ~ name, labeller = label_parsed) +
     ggbeeswarm::geom_quasirandom(method = "pseudorandom", alpha = 0.25, size = 0.5) +
     stat_summary(geom = "point", fun = "mean", color = pal[2], fill = pal[2], size = 0.5, shape = 23) +
     scale_x_discrete(labels = c(1, "", 3, "", 5, "", 7, "", 9, "")) + scale_y_continuous(limits = c(0, 1), breaks = c(0, 1, 0.5)) +
-    xlab(expression(paste("Approximation order ", italic(k)))) + ylab(expression(paste("Prediction skill ", italic(rho[k])))) + labs(tag = "D") + theme_st(lunit = 2)
+    xlab(expression(paste("Approximation order ", italic(k)))) + ylab(expression(paste("Prediction skill ", italic(rho[k])))) + labs(tag = "C") + theme_st(lunit = 2)
 
-(gp1 / (gp2 | gp3) / gp4) |> ggsaver("fig02", width = 8.7, height = 13.5, ext = "pdf")
+((gp1 | gp2) / gp3) |> ggsaver("fig02", width = 8.7, height = 9, ext = "pdf")
