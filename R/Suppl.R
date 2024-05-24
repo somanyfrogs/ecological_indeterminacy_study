@@ -2,7 +2,7 @@
 #' @descritption File for Supplementary Information for the Paper entitled:
 #'      "Unravaling emergent network indeterminacy in complex ecosystems: a random matrix approach"
 #'      Initially written on 20230518 by K.Kawatsu.
-#'      Last update: 20240408.
+#'      Last update: 20240524.
 
 ## Load R functions
 source("R/functions.R")
